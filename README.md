@@ -338,16 +338,19 @@ async function searchLeads(category) {
 
   const prompt = `You are a lead research assistant for Aedica (aedica.co.za), a South African home services marketplace.
 
-Search for REAL South African ${category.label} that Xolani Dlamini (founder of Aedica) can contact for business outreach.
+Search for REAL South African ${category.label} that Xolani Mthethwa (founder of Aedica) can contact for business outreach.
 
-Search query to use: "${category.query} LinkedIn South Africa"
+Search query: "${category.query} South Africa social media"
 
 Find real people at real companies in Johannesburg, Cape Town, Pretoria, Durban, or Mpumalanga.
+For each person find where they are ACTUALLY active online: LinkedIn, Instagram, Facebook, Twitter/X, TikTok, or their own website.
 
 Return EXACTLY 6 leads as a raw JSON array. No markdown, no backticks, no explanation — ONLY the JSON array.
 
 Format:
-[{"name":"Full Name","title":"Job Title","company":"Company Name","location":"City, SA","platform":"LinkedIn","searchUrl":"https://www.linkedin.com/search/results/people/?keywords=FullName+CompanyName","notes":"Why they are relevant to Aedica"}]`;
+[{"name":"Full Name","title":"Job Title","company":"Company Name","location":"City, SA","platform":"Instagram","searchUrl":"https://www.instagram.com/theirhandle","notes":"Why they are relevant to Aedica"}]
+
+platform must be one of: LinkedIn, Instagram, Facebook, Twitter, TikTok, Website. Use the platform they are most active on.`;
 
   try {
     document.getElementById("searchLog").textContent = "Searching the web for real leads...";
@@ -425,7 +428,7 @@ function renderResults(leads, category) {
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
         <a href="${lead.searchUrl}" target="_blank"
           style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f97316;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">
-          🔗 Find on ${lead.platform||"LinkedIn"}
+          ${{LinkedIn:"💼",Instagram:"📸",Facebook:"👥",Twitter:"🐦",TikTok:"🎵",Website:"🌐"}[lead.platform]||"🔗"} Find on ${lead.platform||"LinkedIn"}
         </a>
         <button class="btn" id="msgBtn_${i}" onclick="generateMessage(${i},'${encodeURIComponent(JSON.stringify(lead))}','${encodeURIComponent(JSON.stringify(category))}')"
           style="background:#f97316;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit">
@@ -460,17 +463,30 @@ async function generateMessage(index, leadEnc, catEnc) {
   btn.style.background = "#1a1a1a";
   btn.disabled = true;
 
-  const prompt = `Write a short, casual, genuine LinkedIn DM from Xolani Dlamini, founder of Aedica (aedica.co.za) — a South African home services marketplace connecting homeowners with vetted contractors, featuring an escrow wallet for secure payments.
+  const platform = lead.platform || "LinkedIn";
+  const platformStyle = {
+    LinkedIn: "professional but warm LinkedIn DM",
+    Instagram: "casual friendly Instagram DM",
+    Facebook: "friendly Facebook message",
+    Twitter: "short punchy Twitter/X DM (under 280 chars)",
+    TikTok: "casual TikTok DM",
+    Website: "short professional email or contact form message"
+  }[platform] || "short casual DM";
+
+  const prompt = `Write a short, genuine ${platformStyle} from Xolani Mthethwa, founder of Aedica (aedica.co.za) — a South African home services marketplace connecting homeowners with vetted contractors, with an escrow wallet for secure payments.
 
 Write to: ${lead.name}, ${lead.title} at ${lead.company} in ${lead.location}.
+Platform: ${platform}
 Angle: ${category.angle}
 
 Rules:
 - Max 4 sentences
 - Sound like a real person, not AI
 - No subject line
-- Use their actual name
-- Be warm and direct`;
+- Start with their name
+- Mention aedica.co.za naturally
+- Be warm, direct and genuine
+- Tailor the tone for ${platform}`;
 
   try {
     const response = await fetch(
@@ -564,5 +580,6 @@ function copyText(encoded, msg) {
 </script>
 </body>
 </html>
+
 
       
