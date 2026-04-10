@@ -351,7 +351,7 @@ Format:
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${getKey()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getKey()}`,
       {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -472,7 +472,7 @@ Rules:
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${getKey()}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getKey()}`,
       {
         method: "POST",
         headers: {"Content-Type":"application/json"},
@@ -562,10 +562,3 @@ function copyText(encoded, msg) {
 </script>
 </body>
 </html>
-
-
-
-     
-    
-
-     
