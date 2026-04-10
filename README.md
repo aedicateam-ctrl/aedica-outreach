@@ -31,15 +31,19 @@
   <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#f97316;margin-bottom:8px">AEDICA</div>
   <div style="font-size:11px;color:#444;letter-spacing:2px;text-transform:uppercase;margin-bottom:40px">Outreach Engine</div>
   <div style="width:100%;max-width:400px;background:#111;border:1px solid #1c1c1c;border-radius:16px;padding:24px">
-    <div style="font-size:15px;font-weight:600;margin-bottom:6px">Enter your Gemini API Key</div>
-    <div style="font-size:12px;color:#555;margin-bottom:16px;line-height:1.6">Get a free key at <a href="https://aistudio.google.com" target="_blank" style="color:#f97316">aistudio.google.com</a> → Get API Key. It's free, 1500 calls/day.</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">Gemini API Key</div>
+    <div style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6">Free at <a href="https://aistudio.google.com" target="_blank" style="color:#f97316">aistudio.google.com</a> → Get API Key (1500 calls/day)</div>
     <input id="apiKeyInput" type="password" placeholder="AIzaSy..." 
+      style="width:100%;background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px;color:#f0ede8;font-size:14px;font-family:inherit;margin-bottom:18px"/>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">Serper API Key <span style="color:#10b981;font-size:11px;font-weight:400">(for real Google results)</span></div>
+    <div style="font-size:12px;color:#555;margin-bottom:10px;line-height:1.6">Free at <a href="https://serper.dev" target="_blank" style="color:#f97316">serper.dev</a> → Sign up → API Key (2500 free searches/month)</div>
+    <input id="serperKeyInput" type="password" placeholder="your-serper-key..." 
       style="width:100%;background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px;color:#f0ede8;font-size:14px;font-family:inherit;margin-bottom:12px"/>
     <button class="btn" onclick="saveApiKey()"
       style="width:100%;background:#f97316;border:none;color:#fff;padding:13px;border-radius:10px;font-size:14px;font-weight:700;font-family:inherit">
       Let's Go →
     </button>
-    <div id="keyError" style="color:#ef4444;font-size:12px;margin-top:10px;display:none">Please enter your API key first.</div>
+    <div id="keyError" style="color:#ef4444;font-size:12px;margin-top:10px;display:none">Please enter both API keys.</div>
   </div>
 </div>
 
@@ -159,7 +163,8 @@ let generatedMessages = {};
 // ── INIT ──────────────────────────────────────────────
 window.addEventListener('load', () => {
   const key = localStorage.getItem("aedica_gemini_key");
-  if (key) {
+  const serperKey = localStorage.getItem("aedica_serper_key");
+  if (key && serperKey) {
     document.getElementById("setupScreen").style.display = "none";
     document.getElementById("mainApp").style.display = "block";
     initApp();
@@ -171,14 +176,17 @@ window.addEventListener('load', () => {
 
 function saveApiKey() {
   const key = document.getElementById("apiKeyInput").value.trim();
-  if (!key) { document.getElementById("keyError").style.display = "block"; return; }
+  const serperKey = document.getElementById("serperKeyInput").value.trim();
+  if (!key || !serperKey) { document.getElementById("keyError").style.display = "block"; return; }
   localStorage.setItem("aedica_gemini_key", key);
+  localStorage.setItem("aedica_serper_key", serperKey);
   document.getElementById("setupScreen").style.display = "none";
   document.getElementById("mainApp").style.display = "block";
   initApp();
 }
 
 function getKey() { return localStorage.getItem("aedica_gemini_key") || ""; }
+function getSerperKey() { return localStorage.getItem("aedica_serper_key") || ""; }
 
 function initApp() {
   try { tracker = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch { tracker = []; }
@@ -350,14 +358,31 @@ Format:
 [{"name":"Full Name","title":"Job Title","company":"Company Name","location":"City, SA","platform":"LinkedIn","searchUrl":"https://www.linkedin.com/search/results/people/?keywords=FullName+CompanyName","notes":"Why they are relevant to Aedica"}]`;
 
   try {
+    // Step 1: Get real Google search results via Serper
+    document.getElementById("searchLog").textContent = "Searching Google for real leads...";
+    const serperRes = await fetch("https://google.serper.dev/search", {
+      method: "POST",
+      headers: {"Content-Type":"application/json","X-API-KEY": getSerperKey()},
+      body: JSON.stringify({q: category.query + " LinkedIn", gl: "za", num: 10})
+    });
+    const serperData = await serperRes.json();
+    if (serperData.error) throw new Error("Serper: " + serperData.error);
+
+    const searchSnippets = (serperData.organic || []).map((r, i) =>
+      `${i+1}. Title: ${r.title}\n   Snippet: ${r.snippet}\n   URL: ${r.link}`
+    ).join("\n\n");
+
+    // Step 2: Gemini extracts structured leads from real results
+    document.getElementById("searchLog").textContent = "AI extracting leads from results...";
+    const enrichedPrompt = prompt + `\n\nHere are real Google search results to extract leads from:\n\n${searchSnippets}`;
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getKey()}`,
       {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({
-          contents: [{parts:[{text: prompt}]}],
-          tools: [{google_search:{}}],
+          contents: [{parts:[{text: enrichedPrompt}]}],
           generationConfig: {temperature: 0.3}
         })
       }
@@ -562,3 +587,6 @@ function copyText(encoded, msg) {
 </script>
 </body>
 </html>
+
+       
+  
