@@ -31,7 +31,7 @@
   <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:#f97316;margin-bottom:8px">AEDICA</div>
   <div style="font-size:11px;color:#444;letter-spacing:2px;text-transform:uppercase;margin-bottom:40px">Outreach Engine</div>
   <div style="width:100%;max-width:400px;background:#111;border:1px solid #1c1c1c;border-radius:16px;padding:24px">
-    <div style="font-size:15px;font-weight:600;margin-bottom:6px">Enter your Gemini API Key</div>
+    <div style="font-size:15px;font-weight:600;margin-bottom:6px">AIzaSyDhotX4U1cx4bNSzczQS9RNGgSIu-kBv-U</div>
     <div style="font-size:12px;color:#555;margin-bottom:16px;line-height:1.6">Get a free key at <a href="https://aistudio.google.com" target="_blank" style="color:#f97316">aistudio.google.com</a> → Get API Key. It's free, 1500 calls/day.</div>
     <input id="apiKeyInput" type="password" placeholder="AIzaSy..." 
       style="width:100%;background:#0d0d0d;border:1px solid #222;border-radius:10px;padding:12px;color:#f0ede8;font-size:14px;font-family:inherit;margin-bottom:12px"/>
