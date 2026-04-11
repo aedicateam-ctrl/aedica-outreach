@@ -338,21 +338,29 @@ async function searchLeads(category) {
   document.getElementById("resultsList").innerHTML = "";
   document.getElementById("searchLog").textContent = "Asking Gemini to search the web...";
 
-  const prompt = `You are a lead research assistant for Aedica (aedica.co.za), a South African home services marketplace.
+  const prompt = `You are a lead generation expert for Aedica (aedica.co.za) — a home services marketplace that connects homeowners with tradespeople and contractors. The founder Xolani Mthethwa wants to reach out to real people who do ${category.label} work.
 
-Search for REAL South African ${category.label} that Xolani Mthethwa (founder of Aedica) can contact for business outreach.
+Search the ENTIRE internet — Facebook, Instagram, TikTok, YouTube, Google Business, trade directories, local forums, WhatsApp community pages, any website — for REAL individual people who do ${category.label} work. 
 
-Search query: "${category.query} South Africa social media"
+These are NOT corporate companies. We want:
+- Informal or independent tradespeople
+- Self-employed workers
+- Small one-person operations
+- Anyone who posts about doing this kind of work online
+- People with Facebook pages, Instagram profiles, TikTok accounts showing their work
+- Anyone listed on Gumtree, Junk Mail, or any classifieds site
 
-Find real people at real companies in Johannesburg, Cape Town, Pretoria, Durban, or Mpumalanga.
-For each person find where they are ACTUALLY active online: LinkedIn, Instagram, Facebook, Twitter/X, TikTok, or their own website.
+NO location filter — find them ANYWHERE. South Africa preferred but worldwide is fine.
+NO platform filter — use wherever they are actually found online.
 
-Return EXACTLY 6 leads as a raw JSON array. No markdown, no backticks, no explanation — ONLY the JSON array.
+Search query to use: "${category.query} independent contractor self employed"
 
-Format:
-[{"name":"Full Name","title":"Job Title","company":"Company Name","location":"City, SA","platform":"Instagram","searchUrl":"https://www.instagram.com/theirhandle","notes":"Why they are relevant to Aedica"}]
+Return EXACTLY 8 leads as a raw JSON array. No markdown, no backticks, no explanation — ONLY the JSON array.
 
-platform must be one of: LinkedIn, Instagram, Facebook, Twitter, TikTok, Website. Use the platform they are most active on.`;
+[{"name":"Full Name or Business Name","title":"What they do","company":"Their business name or Self-employed","location":"City, Country","platform":"Facebook","searchUrl":"https://www.google.com/search?q=THEIR+NAME+THEIR+TRADE+THEIR+PLATFORM","notes":"Where they were found and why they are a good lead for Aedica"}]
+
+For searchUrl: use their DIRECT profile URL if you know it (e.g. https://www.facebook.com/theirpage), otherwise use a Google search URL for them.
+platform must be: LinkedIn, Instagram, Facebook, TikTok, YouTube, Gumtree, Website, or Google.`;
 
   try {
     document.getElementById("searchLog").textContent = "Searching the web for real leads...";
@@ -465,30 +473,34 @@ async function generateMessage(index, leadEnc, catEnc) {
   btn.style.background = "#1a1a1a";
   btn.disabled = true;
 
-  const platform = lead.platform || "LinkedIn";
-  const platformStyle = {
-    LinkedIn: "professional but warm LinkedIn DM",
-    Instagram: "casual friendly Instagram DM",
-    Facebook: "friendly Facebook message",
-    Twitter: "short punchy Twitter/X DM (under 280 chars)",
-    TikTok: "casual TikTok DM",
-    Website: "short professional email or contact form message"
-  }[platform] || "short casual DM";
+  const platform = lead.platform || "Facebook";
+  const platformTone = {
+    LinkedIn: "professional but warm",
+    Instagram: "casual and friendly",
+    Facebook: "casual, like messaging a friend",
+    TikTok: "very short and casual",
+    YouTube: "friendly and genuine",
+    Gumtree: "straight to the point",
+    Website: "brief and professional",
+    Google: "friendly and direct"
+  }[platform] || "casual and genuine";
 
-  const prompt = `Write a short, genuine ${platformStyle} from Xolani Mthethwa, founder of Aedica (aedica.co.za) — a South African home services marketplace connecting homeowners with vetted contractors, with an escrow wallet for secure payments.
+  const prompt = `Write a short, genuine ${platformTone} DM or message from Xolani Mthethwa, founder of Aedica (aedica.co.za).
 
-Write to: ${lead.name}, ${lead.title} at ${lead.company} in ${lead.location}.
-Platform: ${platform}
+Aedica is a South African home services marketplace — it helps homeowners find and pay tradespeople safely using an escrow wallet. Tradespeople get more clients and get paid securely.
+
+Write to: ${lead.name}, who does ${lead.title} work. Found on ${platform}.
 Angle: ${category.angle}
 
-Rules:
-- Max 4 sentences
-- Sound like a real person, not AI
-- No subject line
-- Start with their name
-- Mention aedica.co.za naturally
-- Be warm, direct and genuine
-- Tailor the tone for ${platform}`;
+The message must:
+- Feel like a real human wrote it, not AI
+- Be max 4 sentences
+- Open with their name
+- Explain what Aedica does in ONE simple sentence
+- Tell them why it benefits THEM specifically (more clients, secure payment)
+- End with a soft call to action — check out aedica.co.za or just reply
+- Match the casual/formal tone of ${platform}
+- NOT sound like a sales pitch or corporate message`;
 
   try {
     const response = await fetch(
