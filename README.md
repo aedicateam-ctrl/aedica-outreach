@@ -1,4 +1,6 @@
-<!DOCTYPE html> 
+---
+---
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -428,7 +430,7 @@ function renderResults(leads, category) {
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
         <a href="${lead.searchUrl}" target="_blank"
           style="background:#1a1a1a;border:1px solid #2a2a2a;color:#f97316;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">
-          ${{LinkedIn:"💼",Instagram:"📸",Facebook:"👥",Twitter:"🐦",TikTok:"🎵",Website:"🌐"}[lead.platform]||"🔗"} Find on ${lead.platform||"LinkedIn"}
+          🔗 Find on ${lead.platform||"LinkedIn"}
         </a>
         <button class="btn" id="msgBtn_${i}" onclick="generateMessage(${i},'${encodeURIComponent(JSON.stringify(lead))}','${encodeURIComponent(JSON.stringify(category))}')"
           style="background:#f97316;border:none;color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;font-family:inherit">
@@ -580,6 +582,3 @@ function copyText(encoded, msg) {
 </script>
 </body>
 </html>
-
-
-      
